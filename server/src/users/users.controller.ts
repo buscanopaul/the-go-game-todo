@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './users.entity';
+import * as bcrypt from 'bcrypt';
 
 @Controller('users')
 export class UsersController {
@@ -10,13 +11,13 @@ export class UsersController {
     private usersRepository: Repository<User>,
   ) {}
 
-  @Get()
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
-  }
-
   @Post()
-  create(@Body() user: User): Promise<User> {
+  async create(@Body() userData: User): Promise<User> {
+    // Hash the password before saving
+    const saltRounds = 10;
+    userData.password = await bcrypt.hash(userData.password, saltRounds);
+
+    const user = this.usersRepository.create(userData);
     return this.usersRepository.save(user);
   }
 }
