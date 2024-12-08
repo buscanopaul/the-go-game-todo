@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module'; // Import UsersModule
 import { Todo } from './todos/todo.entity';
 import { Session } from './auth/auth.entity';
 import { User } from './users/users.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { User } from './users/users.entity';
       }),
     }),
     UsersModule, // Register UsersModule
+    AuthModule, // Register AuthModule
   ],
 })
 export class AppModule {}
