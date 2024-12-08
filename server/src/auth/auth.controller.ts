@@ -1,12 +1,20 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Session } from './auth.entity';
-import { User } from 'src/users/users.entity';
+import { User } from 'src/users/user.entity';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'src/dto/login.dto';
+
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from 'src/users/dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,32 +23,44 @@ export class AuthController {
     private sessionRepository: Repository<Session>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private jwtService: JwtService, // Inject JwtService
   ) {}
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const { email, password } = loginDto;
+    try {
+      const { email, password } = loginDto;
 
-    const user = await this.usersRepository.findOne({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      // Check if user exists
+      const user = await this.usersRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
+      // Check if password matches
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      }
+
+      // Generate JWT token
+      const payload = { userId: user.id };
+      const accessToken = await this.jwtService.signAsync(payload);
+
+      // Set the JWT token as a cookie
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600 * 1000, // 1 hour
+      });
+
+      return res.json({ message: 'Login successful', accessToken });
+    } catch (error) {
+      // Catch any unexpected errors and return a proper response
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Internal server error',
+        error: error.message,
+      });
     }
-
-    const sessionId = uuidv4();
-    const session = this.sessionRepository.create({
-      sessionId,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    });
-
-    await this.sessionRepository.save(session);
-
-    res.cookie('sessionId', sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.json({ userId: user.id });
   }
 }

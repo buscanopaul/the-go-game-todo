@@ -1,57 +1,28 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
   Post,
-  Put,
-  Req,
+  Body,
   UseGuards,
+  Request,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { Todo } from './todo.entity';
-import { Repository } from 'typeorm';
+import { TodosService } from './todos.service';
+import { CreateTodoDto } from './dto/create-todo.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guard';
 
 @Controller('todos')
-@UseGuards(AuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TodosController {
-  constructor(
-    @InjectRepository(Todo)
-    @InjectRepository(Todo)
-    private todosRepository: Repository<Todo>,
-  ) {}
-
-  @Get()
-  findAll(@Req() req) {
-    return this.todosRepository.find({
-      where: { userId: req.userId },
-      order: { createdAt: 'DESC' },
-    });
-  }
+  constructor(private readonly todosService: TodosService) {}
 
   @Post()
-  create(@Req() req, @Body() todo: Partial<Todo>) {
-    return this.todosRepository.save({
-      ...todo,
-      userId: req.userId,
-    });
+  create(@Body() createTodoDto: CreateTodoDto, @Request() req) {
+    // Extract userId from JWT payload
+    return this.todosService.create(createTodoDto, req.user.userId);
   }
 
-  @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() todo: Partial<Todo>,
-    @Req() req,
-  ) {
-    await this.todosRepository.update({ id, userId: req.userId }, todo);
-    return this.todosRepository.findOne({ where: { id } });
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: number, @Req() req) {
-    await this.todosRepository.delete({ id, userId: req.userId });
-    return { success: true };
+  @Get()
+  findAll(@Request() req) {
+    return this.todosService.findAll(req.user.userId);
   }
 }

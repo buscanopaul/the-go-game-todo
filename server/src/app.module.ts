@@ -1,27 +1,31 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './users/users.module'; // Import UsersModule
+import { UsersModule } from './users/users.module';
+import { TodosModule } from './todos/todos.module';
+import { User } from './users/user.entity';
 import { Todo } from './todos/todo.entity';
-import { Session } from './auth/auth.entity';
-import { User } from './users/users.entity';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true, // Make config globally available
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: process.env.DATABASE_URL,
-        entities: [Todo, Session, User], // Add User entity here
-        synchronize: true,
+        url: configService.get('DATABASE_URL'),
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        entities: [User, Todo],
+        synchronize: true, // set to false in production
       }),
+      inject: [ConfigService],
     }),
-    UsersModule, // Register UsersModule
-    AuthModule, // Register AuthModule
+    UsersModule,
+    TodosModule,
   ],
 })
 export class AppModule {}

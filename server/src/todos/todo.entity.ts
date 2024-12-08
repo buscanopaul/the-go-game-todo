@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Entity()
 export class Todo {
@@ -6,14 +13,15 @@ export class Todo {
   id: number;
 
   @Column()
-  userId: string;
-
-  @Column()
   title: string;
 
   @Column({ default: false })
   completed: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
+  @ManyToOne(() => User, (user) => user.todos)
+  @JoinColumn({ name: 'userId' }) // Add this
+  user: User;
+
+  @Column() // Add this
+  userId: number;
 }

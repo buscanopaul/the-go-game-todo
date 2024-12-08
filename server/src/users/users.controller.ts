@@ -1,23 +1,19 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './users.entity';
-import * as bcrypt from 'bcrypt';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  async create(@Body() userData: User): Promise<User> {
-    // Hash the password before saving
-    const saltRounds = 10;
-    userData.password = await bcrypt.hash(userData.password, saltRounds);
+  @Post('register')
+  register(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.register(createUserDto);
+  }
 
-    const user = this.usersRepository.create(userData);
-    return this.usersRepository.save(user);
+  @Post('login')
+  login(@Body() loginDto: LoginDto) {
+    return this.usersService.login(loginDto);
   }
 }
