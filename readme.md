@@ -64,12 +64,11 @@ yarn add @nestjs/typeorm typeorm pg @clerk/clerk-sdk-node
 
 ```
 EXPO_PUBLIC_API_URL=your-vercel-api-url
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
 ```
 
 2. Create `.env` file in the server directory:
 
 ```
 DATABASE_URL=your-neon-database-url
-CLERK_SECRET_KEY=your-clerk-secret-key
+JWT_SECRET=your-jwt-secret-key
 ```
