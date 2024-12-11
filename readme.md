@@ -40,6 +40,7 @@ yarn start
 
 ```bash
 # Install dependencies
+new terminal
 cd server
 yarn install
 yarn start
@@ -59,3 +60,6 @@ EXPO_PUBLIC_API_URL=your-api-url ex. http://localhost:3000
 DATABASE_URL=your-neon-database-url // ex. postgresql://.........
 JWT_SECRET=your-jwt-secret-key // ex. anycharacter
 ```
+
+![Project Screenshot](./screenshots/expo.png)
+![DB Screenshot](./screenshots/db.png)
