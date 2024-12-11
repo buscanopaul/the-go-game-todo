@@ -1,55 +1,59 @@
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
-import { apiClient } from './api/client';
 import './global.css';
-import { fetchTodos } from './hooks/fetchTodos';
-import { AuthProvider } from './context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import LoginScreen from './screens/LoginScreen';
+import HomeScreen from './screens/HomeScreen';
+import { useEffect, useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+
+type RootStackParamList = {
+  Login: undefined;
+  Home: undefined;
+};
+
+const queryClient = new QueryClient();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialRoute, setInitialRoute] =
+    useState<keyof RootStackParamList>('Login');
 
   useEffect(() => {
-    fetchTodos(setTodos);
+    const checkToken = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('userToken');
+
+        if (token) {
+          setInitialRoute('Home');
+        }
+      } catch (error) {
+        console.error('Error checking token:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkToken();
   }, []);
 
-  const addTodo = async () => {
-    if (!newTodo.trim()) return;
-    await apiClient.post('/todos', {
-      title: newTodo,
-    });
-    setNewTodo('');
-    fetchTodos(setTodos);
-  };
-
-  console.log(todos);
+  // Show a loading screen or splash screen while checking token
+  if (isLoading) {
+    return null; // Or return a <SplashScreen /> component
+  }
 
   return (
-    <AuthProvider>
-      <View className="flex-1 p-4">
-        <StatusBar style="auto" />
-        <Text>Open up App.tsx to start working on your app!</Text>
-        <TextInput
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white"
-          value={newTodo}
-          onChangeText={setNewTodo}
-          placeholder="Add a new todo"
-          onSubmitEditing={addTodo}
-        />
-        <Pressable onPress={addTodo} className="active:opacity-70">
-          <Text>Add</Text>
-        </Pressable>
-        <FlatList
-          data={todos}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View>
-              <Text>s</Text>
-            </View>
-          )}
-        />
-      </View>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={initialRoute}
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </QueryClientProvider>
   );
 }
