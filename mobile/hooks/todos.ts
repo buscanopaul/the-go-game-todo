@@ -29,7 +29,25 @@ export const useCreateTodo = () => {
 
   return useMutation({
     mutationFn: createTodo,
-    onSuccess: () => {
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+
+      const previousTodos = queryClient.getQueryData(['todos']);
+
+      queryClient.setQueryData(['todos'], (oldTodos) => [
+        ...(oldTodos || []),
+        {
+          ...newTodo,
+          id: Date.now().toString(),
+        },
+      ]);
+
+      return { previousTodos };
+    },
+    onError: (err, newTodo, context) => {
+      queryClient.setQueryData(['todos'], context.previousTodos);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });

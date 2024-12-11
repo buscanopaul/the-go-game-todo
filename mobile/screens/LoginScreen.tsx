@@ -31,6 +31,7 @@ const LoginScreen = ({ navigation }) => {
         value={email}
         onChangeText={setEmail}
         placeholder="Email"
+        autoCapitalize="none"
       />
       <TextInput
         className="p-3 mb-4 border rounded"

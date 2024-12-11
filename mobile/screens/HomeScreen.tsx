@@ -6,11 +6,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { useDeleteTodo, useTodos } from '../hooks/todos';
+import { useCreateTodo, useDeleteTodo, useTodos } from '../hooks/todos';
+import { useState } from 'react';
+import AddTodo from '../components/AddTodo';
 
 const HomeScreen = ({ navigation }) => {
+  const [newTodoTitle, setNewTodoTitle] = useState('');
   const { data: todos, isLoading } = useTodos();
   const deleteTodoMutation = useDeleteTodo();
+  const createTodoMutation = useCreateTodo();
 
   const handleLogout = async () => {
     try {
@@ -18,6 +22,22 @@ const HomeScreen = ({ navigation }) => {
       navigation.replace('Login');
     } catch (error) {
       console.error('Logout error:', error);
+    }
+  };
+
+  const handleAddTodo = () => {
+    if (newTodoTitle.trim()) {
+      createTodoMutation.mutate(
+        { title: newTodoTitle.trim() },
+        {
+          onSuccess: () => {
+            setNewTodoTitle('');
+          },
+          onError: (error) => {
+            console.error('Failed to create todo:', error);
+          },
+        }
+      );
     }
   };
 
@@ -32,10 +52,18 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View className="items-center justify-center flex-1">
       <View className="h-40" />
-      <Pressable className="active:opacity-70" onPress={handleLogout}>
-        <Text>Logout</Text>
+      <Pressable
+        className="p-3 bg-black rounded-full active:opacity-70"
+        onPress={handleLogout}
+      >
+        <Text className="text-white">Logout</Text>
       </Pressable>
       <View className="h-10" />
+      <AddTodo
+        onPress={handleAddTodo}
+        newTodoTitle={newTodoTitle}
+        setNewTodoTitle={setNewTodoTitle}
+      />
       <FlatList
         data={todos}
         renderItem={({ item }) => (
@@ -49,7 +77,9 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={() => <Text>No Todos found</Text>}
+        ListEmptyComponent={() => (
+          <Text className="text-gray-400">No Todos found</Text>
+        )}
       />
     </View>
   );
