@@ -6,7 +6,7 @@ export const getTodos = async (): Promise<Todo[]> => {
   return data;
 };
 
-export const getTodoById = async (id: string): Promise<Todo> => {
+export const getTodoById = async (id: number): Promise<Todo> => {
   const { data } = await api.get<Todo>(`/todos/${id}`);
   return data;
 };
@@ -17,13 +17,13 @@ export const createTodo = async (todo: CreateTodoDTO): Promise<Todo> => {
 };
 
 export const updateTodo = async (
-  id: string,
+  id: number,
   todo: UpdateTodoDTO
 ): Promise<Todo> => {
   const { data } = await api.put<Todo>(`/todos/${id}`, todo);
   return data;
 };
 
-export const deleteTodo = async (id: string): Promise<void> => {
+export const deleteTodo = async (id: number): Promise<void> => {
   await api.delete(`/todos/${id}`);
 };

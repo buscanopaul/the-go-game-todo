@@ -8,7 +8,7 @@ export interface LoginResponse {
 }
 
 export interface Todo {
-  id: string;
+  id: number;
   title: string;
   isCompleted: boolean;
   createdAt: string;

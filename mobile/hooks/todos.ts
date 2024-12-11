@@ -11,6 +11,9 @@ export const useTodos = () => {
   return useQuery({
     queryKey: ['todos'],
     queryFn: getTodos,
+    staleTime: 3000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 

@@ -24,16 +24,13 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View
-      className="justify-center flex-1 p-4"
-      style={{ flex: 1, justifyContent: 'center' }}
-    >
+    <View className="justify-center flex-1 p-4">
+      <Text className="mb-5 text-5xl font-bold text-center">Welcome</Text>
       <TextInput
         className="p-3 mb-4 border rounded"
         value={email}
         onChangeText={setEmail}
         placeholder="Email"
-        autoCapitalize="none"
       />
       <TextInput
         className="p-3 mb-4 border rounded"
@@ -41,7 +38,6 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setPassword}
         placeholder="Password"
         secureTextEntry
-        autoCapitalize="none"
       />
       <TouchableOpacity
         className="p-4 bg-blue-500 rounded"
