@@ -10,7 +10,7 @@ export interface LoginResponse {
 export interface Todo {
   id: number;
   title: string;
-  isCompleted: boolean;
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,5 +21,5 @@ export interface CreateTodoDTO {
 
 export interface UpdateTodoDTO {
   title?: string;
-  isCompleted?: boolean;
+  completed?: boolean;
 }

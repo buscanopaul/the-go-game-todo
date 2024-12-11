@@ -11,7 +11,6 @@ export const useTodos = () => {
   return useQuery({
     queryKey: ['todos'],
     queryFn: getTodos,
-    staleTime: 3000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
@@ -59,6 +58,9 @@ export const useUpdateTodo = () => {
   return useMutation({
     mutationFn: ({ id, ...data }) => updateTodo(id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });

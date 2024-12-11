@@ -1,9 +1,12 @@
 import api from './client';
 import { CreateTodoDTO, Todo, UpdateTodoDTO } from './types';
 
-export const getTodos = async (): Promise<Todo[]> => {
-  const { data } = await api.get<Todo[]>('/todos');
-  return data;
+export const getTodos = async () => {
+  const response = await api.get('/todos');
+  // If needed, sort by a consistent field like creation date
+  return response.data.sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
 };
 
 export const getTodoById = async (id: number): Promise<Todo> => {

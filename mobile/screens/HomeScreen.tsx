@@ -1,20 +1,26 @@
-import {
-  View,
-  Text,
-  Pressable,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { useCreateTodo, useDeleteTodo, useTodos } from '../hooks/todos';
+import {
+  useCreateTodo,
+  useDeleteTodo,
+  useTodos,
+  useUpdateTodo,
+} from '../hooks/todos';
 import { useState } from 'react';
 import AddTodo from '../components/AddTodo';
+import EditTodo from '../components/EditTodo';
+import TodoList from '../components/TodoList';
+import Logout from '../components/Logout';
 
 const HomeScreen = ({ navigation }) => {
   const [newTodoTitle, setNewTodoTitle] = useState('');
+  const [editingTodo, setEditingTodo] = useState(null);
+  const [editedTitle, setEditedTitle] = useState('');
+
   const { data: todos, isLoading } = useTodos();
   const deleteTodoMutation = useDeleteTodo();
   const createTodoMutation = useCreateTodo();
+  const updateTodoMutation = useUpdateTodo();
 
   const handleLogout = async () => {
     try {
@@ -41,6 +47,32 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const handleToggleTodo = (todo) => {
+    updateTodoMutation.mutate({
+      id: todo.id,
+      completed: !todo.completed,
+    });
+  };
+
+  const handleEditTodo = (todo) => {
+    setEditingTodo(todo);
+    setEditedTitle(todo.title);
+  };
+
+  const saveEditedTodo = () => {
+    if (editingTodo && editedTitle.trim()) {
+      updateTodoMutation.mutate({
+        id: editingTodo.id,
+        title: editedTitle.trim(),
+      });
+      setEditingTodo(null);
+    }
+  };
+
+  const handleDeleteTodo = (item) => {
+    deleteTodoMutation.mutate(item.id);
+  };
+
   if (isLoading) {
     return (
       <View className="items-center justify-center flex-1">
@@ -50,36 +82,27 @@ const HomeScreen = ({ navigation }) => {
   }
 
   return (
-    <View className="items-center justify-center flex-1">
+    <View className="items-center justify-center flex-1 px-4">
       <View className="h-40" />
-      <Pressable
-        className="p-3 bg-black rounded-full active:opacity-70"
-        onPress={handleLogout}
-      >
-        <Text className="text-white">Logout</Text>
-      </Pressable>
+      <Logout onPress={handleLogout} />
       <View className="h-10" />
       <AddTodo
         onPress={handleAddTodo}
         newTodoTitle={newTodoTitle}
         setNewTodoTitle={setNewTodoTitle}
       />
-      <FlatList
-        data={todos}
-        renderItem={({ item }) => (
-          <View className="flex-row items-center justify-between gap-4 p-4 border-b">
-            <Text>{item.title}</Text>
-            <TouchableOpacity
-              onPress={() => deleteTodoMutation.mutate(item.id)}
-              className="p-2 bg-red-500 rounded"
-            >
-              <Text className="text-white">Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        ListEmptyComponent={() => (
-          <Text className="text-gray-400">No Todos found</Text>
-        )}
+      <TodoList
+        onPress={handleDeleteTodo}
+        todos={todos}
+        handleToggleTodo={handleToggleTodo}
+        handleEditTodo={handleEditTodo}
+      />
+      <EditTodo
+        editingTodo={editingTodo}
+        setEditingTodo={setEditingTodo}
+        editedTitle={editedTitle}
+        setEditedTitle={setEditedTitle}
+        onPress={saveEditedTodo}
       />
     </View>
   );
