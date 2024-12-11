@@ -1,21 +1,20 @@
 ## Project Structure
 
 ```
-todo-app/
+the-go-game-todo/
 ├── mobile/                 # React Native Expo app
 │   ├── src/
+│   │   ├── api/
 │   │   ├── components/
-│   │   ├── screens/
 │   │   ├── hooks/
-│   │   ├── services/
-│   │   └── types/
+│   │   ├── screens/
 │   ├── App.tsx
 │   └── package.json
 └── server/                 # NestJS backend
     ├── src/
-    │   ├── todos/
     │   ├── auth/
-    │   ├── config/
+    │   ├── todos/
+    │   ├── users/
     │   └── main.ts
     └── package.json
 ```
@@ -24,38 +23,26 @@ todo-app/
 
 ### Prerequisites
 
-1. Node.js (v18 or later)
-2. PostgreSQL
-3. Expo CLI
-4. Clerk Account
-5. Neon Database Account
+1. Node.js (v18 or later, I used nvm 20.9.0)
+2. PostgreSQL - Neon Database Account (neon.tech create a project)
+3. Expo Go
 
 ### Frontend Setup
 
 ```bash
-# Install Expo CLI
-npm install -g expo-cli
-
-# Create new Expo project
-npx create-expo-app mobile --template expo-template-blank-typescript
-
 # Install dependencies
 cd mobile
-yarn add @clerk/clerk-expo axios @react-navigation/native @react-navigation/stack
+yarn install
+yarn start
 ```
 
 ### Backend Setup
 
 ```bash
-# Install NestJS CLI
-npm install -g @nestjs/cli
-
-# Create new NestJS project
-nest new server
-
 # Install dependencies
 cd server
-yarn add @nestjs/typeorm typeorm pg @clerk/clerk-sdk-node
+yarn install
+yarn start
 ```
 
 ### Environment Setup
@@ -63,12 +50,12 @@ yarn add @nestjs/typeorm typeorm pg @clerk/clerk-sdk-node
 1. Create `.env` file in the mobile directory:
 
 ```
-EXPO_PUBLIC_API_URL=your-vercel-api-url
+EXPO_PUBLIC_API_URL=your-api-url ex. http://localhost:3000
 ```
 
 2. Create `.env` file in the server directory:
 
 ```
-DATABASE_URL=your-neon-database-url
-JWT_SECRET=your-jwt-secret-key
+DATABASE_URL=your-neon-database-url // ex. postgresql://.........
+JWT_SECRET=your-jwt-secret-key // ex. anycharacter
 ```
