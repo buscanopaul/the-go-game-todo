@@ -52,6 +52,7 @@ yarn start
 
 ```
 EXPO_PUBLIC_API_URL=your-api-url ex. http://localhost:3000
+You can use my deployed backend on railway: https://the-go-game-todo-production.up.railway.app/
 ```
 
 2. Create `.env` file in the server directory:
